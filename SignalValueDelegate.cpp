@@ -52,14 +52,15 @@ QWidget *SignalValueDelegate::createEditor(QWidget *parent,
         sigName = Utils::trim(sigName);
 
         QStringList list;
+        if(channel == CAN){
         list << "";
-        if(msg->channel == CAN){
             for( std::pair<string, string> vm  :msg->sig[sigName].valueMap.map){
                 list << (vm.second + "  :" + vm.first).c_str();
             }
+            list<<"Random";
         }
-        list<<"Random";
         box->addItems(list);
+
         return box;
     }
     return NULL;

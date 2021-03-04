@@ -4,9 +4,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-INCLUDEPATH = ~/bin/libxl-3.9.1.0/include_cpp
-LIBS += ~/bin/libxl-3.9.1.0/lib64/libxl.so
-
+INCLUDEPATH += ~/bin/libxls/includep
+#LIBS += ~/bin/libxl-3.9.1.0/lib64/libxl.so
+LIBS += ~/bin/libxls/.libs/libxlsreader.so
+LIBS += ~/bin/libxls/.libs/libxlsreader.so.8
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the

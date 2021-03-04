@@ -179,7 +179,7 @@ void MainWindow::on_pushButton_2_clicked()
     QFileDialog* dialog = new QFileDialog(this);
     dialog->setWindowTitle(QStringLiteral("选文件"));
     dialog->setDirectory("");
-    dialog->setNameFilter(tr("File(*.xlsx or *.dbc)"));
+    dialog->setNameFilter(tr("File(*.xls or *.dbc)"));
     //dialog->setNameFilter(tr("File(*.dbc)"));
 
     dialog->setFileMode(QFileDialog::ExistingFiles);
@@ -197,7 +197,7 @@ void MainWindow::on_pushButton_2_clicked()
         if(list.length() == 0){
             MsgFile* file;
             //QStandardItem* tmp = new QStandardItem(s);
-            if(s.endsWith("xlsx")){
+            if(s.endsWith("xls")){
                 file = new MDBFile(s.toStdString());
             } else if (s.endsWith("dbc")){
                 file = new DBCFile(s.toStdString());
@@ -370,14 +370,14 @@ void MainWindow::treeItemChanged(QStandardItem * item){
     Msg* msg;
     if(isRefresh ) return; //|| (item->column()!= 7 && item->column() != 0))
 
-    printf("treeItemChanged\n");
+//    printf("treeItemChanged\n");
 
     if(item->parent()){
         sscanf(item->parent()->text().toStdString().c_str(), "0x%x", &canId);
     }else {
         sscanf(treeModel->item(item->row(),0)->text().toStdString().c_str(), "0x%x", &canId);
     }
-    printf("treeItemChanged %x\n", canId);
+//    printf("treeItemChanged %x\n", canId);
 
     for (MsgFile* it : DataManager::getInstace()->getList()) {
         if(strcmp(it->getChannel().c_str(), treeModel->item(item->row(),1)->text().toStdString().c_str()) == 0){
@@ -400,7 +400,7 @@ void MainWindow::treeItemChanged(QStandardItem * item){
             DataCalcManager::getInstance().del(*msg);
         }
     }
-    printf("treeItemChanged end %x\n", canId);
+    //printf("treeItemChanged end %x\n", canId);
 
 }
 

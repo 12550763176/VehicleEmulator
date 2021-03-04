@@ -25,18 +25,14 @@ void DataCalcManager::randomSend(){
             string value;
             //printf("adfsaf fcda  %s\n", it.first.c_str());
             if(!it.second->name.c_str()){continue;}
-            printf("adfadv fcda  %s\n", it.second->name.c_str());
 
             string max = it.second->sig[it.first].max;
 
             string min = it.second->sig[it.first].min;
-            printf("vaeqre fcda  %s\n", it.first.c_str());
 
             string resolution = it.second->sig[it.first].resolution;
-            printf("v fcda  %s\n", it.first.c_str());
 
             string offset = it.second->sig[it.first].Offset;
-            printf("qer fcda  %s\n", it.first.c_str());
 
             if((atol(resolution.c_str()) == atof(resolution.c_str())) && (atol(offset.c_str()) == atof(offset.c_str()))){
                  long maxValue = atol(max.c_str());
@@ -132,24 +128,32 @@ bool DataCalcManager::updateData(Msg& msg, string sigName, string sigValue)
     }
 
     if(msg.channel == SPI){
-        if(msg.dataBytes == 0){
-            msg.data.resize(sigValue.length() + 2);
-            msg.data[0] = (sigValue.length() >> 8) & 0xff;
-            msg.data[1] = sigValue.length() &  0xff;
-            //TODO
-            sigValue.assign(msg.data.begin()+2, msg.data.end());
-        }else{
-            msg.data.resize(msg.dataBytes + 2);
-            printf("updateData %x, %s %s, %d, size: %d\n", msg.id, msg.name.c_str(), sigName.c_str(), msg.data.size(), msg.dataBytes);
-            int64_t curValue = stol(sigValue);
-            msg.data[0] = (msg.dataBytes >> 8) & 0xff;
-            msg.data[1] = msg.dataBytes &  0xff;
-            for(int i = 0; i < msg.dataBytes;  i++){
-                msg.data[msg.data.size() - i - 1] =( curValue & 0xff);
-                curValue = curValue >> 8;
-            }
-        }
 
+        if(msg.sig[sigName].curValue == sigValue){
+            return false;
+        }
+        double tmp = atof(sigValue.c_str());
+        uint64_t value = atol(sigValue.c_str());
+
+        msg.sig[sigName].curValue = sigValue;
+            //TODO
+        if(msg.data.size() < (msg.dataBytes +2)){
+            msg.data.resize(msg.dataBytes + 2);
+            msg.data[0] = (msg.dataBytes >> 8) & 0xff;
+            msg.data[1] = (msg.dataBytes) &  0xff;
+            }
+        int index = msg.sig[sigName].startByte + 2;
+//        printf("%x %s, %s, sigSize:%d, startByte:%d\n", msg.id, sigName.c_str(), msg.sig[sigName].curValue.c_str(), msg.sig[sigName].sigSize, msg.sig[sigName].startByte);
+
+        for(int i = msg.sig[sigName].sigSize-1; i >= 0; i--){
+            msg.data[index + i] =  value & 0xff;
+            value = value >> 8;
+        }
+//        calcValue(msg);
+//        for(uint8_t i : msg.data){
+//            printf("%x  ", i);
+//        }
+//      printf("\n");
     } else {
         if(msg.sig[sigName].curValue == sigValue){
             return false;
@@ -167,10 +171,10 @@ bool DataCalcManager::updateData(Msg& msg, string sigName, string sigValue)
         }
         //printf("%x %s, %s,  %s    sigSize:%d, endByte:%d\n", msg.id, msg.sig[sigName].curValue.c_str(), msg.sig[sigName].curValue.c_str(), msg.sig[sigName].sigSize, msg.sig[sigName].endByte);
         calcValue(msg);
-        for(uint8_t i : msg.data){
-            printf("%x  ", i);
-        }
-      printf("\n");
+//        for(uint8_t i : msg.data){
+//            printf("%x  ", i);
+//        }
+//        printf("\n");
     }
 
     if(msg.isSelect){

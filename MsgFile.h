@@ -30,6 +30,7 @@ struct Signal {
     uint16_t endByte;
 
     uint8_t startBit;
+    uint8_t startByte;
     uint8_t sigSize;
     char byteOrder; //0代表Motorola格式，1代表Inter格式；
     char valueType; //+表示无符号数，-表示有符号数；
