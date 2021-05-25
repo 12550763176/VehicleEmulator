@@ -111,10 +111,11 @@ bool DataCalcManager::updateData(Msg& msg, string sigName, string sigValue)
 {
    printf("updateData %x, %s %s, %s\n", msg.id, msg.name.c_str(), sigName.c_str(), sigValue.c_str());
     //handle sigValue
+
     if(sigValue.empty()){
         return false;
     }
-    if(!Utils::isNum(sigValue)){
+    if(!Utils::isNum(sigValue) &&sigValue.find(":")!= string::npos){
         vector<string> vec = Utils::split(sigValue, ":");
         if(vec.size()==2){
             sigValue =  vec[1];
@@ -122,38 +123,52 @@ bool DataCalcManager::updateData(Msg& msg, string sigName, string sigValue)
             if(!Utils::isNum(sigValue)){
                 return false;
             }
-        } else {
+        } else if(!(sigValue.find(",")!= string::npos)){
             return false;
         }
     }
 
     if(msg.channel == SPI){
-
         if(msg.sig[sigName].curValue == sigValue){
             return false;
         }
-        double tmp = atof(sigValue.c_str());
-        uint64_t value = atol(sigValue.c_str());
+        if(sigValue.find(",")!= string::npos){
+            printf("aaaaa %x %s, %s, sigSize:%d, startByte:%d\n", msg.id, sigName.c_str(), msg.sig[sigName].curValue.c_str(), msg.sig[sigName].sigSize, msg.sig[sigName].startByte);
 
-        msg.sig[sigName].curValue = sigValue;
-            //TODO
-        if(msg.data.size() < (msg.dataBytes +2)){
-            msg.data.resize(msg.dataBytes + 2);
-            msg.data[0] = (msg.dataBytes >> 8) & 0xff;
-            msg.data[1] = (msg.dataBytes) &  0xff;
+            vector<string> values = Utils::split(sigValue,",");
+            msg.data.resize(values.size() + 2);
+            for(int i=0;i<=values.size()-1; i++){
+                msg.data[i+2] = atoi(values[i].c_str());
             }
-        int index = msg.sig[sigName].startByte + 2;
-//        printf("%x %s, %s, sigSize:%d, startByte:%d\n", msg.id, sigName.c_str(), msg.sig[sigName].curValue.c_str(), msg.sig[sigName].sigSize, msg.sig[sigName].startByte);
+            for (vector<uint8_t>::iterator it = msg.data.begin(); it != msg.data.end();it++)
+            {
+                printf("%d ",*it);
+            }
+        }else{
+            double tmp = atof(sigValue.c_str());
+            uint64_t value = atol(sigValue.c_str());
 
-        for(int i = msg.sig[sigName].sigSize-1; i >= 0; i--){
-            msg.data[index + i] =  value & 0xff;
-            value = value >> 8;
+            msg.sig[sigName].curValue = sigValue;
+                //TODO
+            if(msg.data.size() < (msg.dataBytes +2)){
+                msg.data.resize(msg.dataBytes + 2);
+                msg.data[0] = (msg.dataBytes >> 8) & 0xff;
+                msg.data[1] = (msg.dataBytes) &  0xff;
+                }
+            int index = msg.sig[sigName].startByte + 2;
+            printf("bbbb %x %s, %s, sigSize:%d, startByte:%d\n", msg.id, sigName.c_str(), msg.sig[sigName].curValue.c_str(), msg.sig[sigName].sigSize, msg.sig[sigName].startByte);
+
+            for(int i = msg.sig[sigName].sigSize-1; i >= 0; i--){
+                msg.data[index + i] =  value & 0xff;
+                value = value >> 8;
+            }
+    //        calcValue(msg);
+    //        for(uint8_t i : msg.data){
+    //            printf("%x  ", i);
+    //        }
+    //      printf("\n");
         }
-//        calcValue(msg);
-//        for(uint8_t i : msg.data){
-//            printf("%x  ", i);
-//        }
-//      printf("\n");
+
     } else {
         if(msg.sig[sigName].curValue == sigValue){
             return false;
@@ -169,7 +184,7 @@ bool DataCalcManager::updateData(Msg& msg, string sigName, string sigValue)
             double resolution = atof(msg.sig[sigName].resolution.c_str());
             msg.sig[sigName].curValue = to_string((tmp - offset)/resolution);
         }
-        //printf("%x %s, %s,  %s    sigSize:%d, endByte:%d\n", msg.id, msg.sig[sigName].curValue.c_str(), msg.sig[sigName].curValue.c_str(), msg.sig[sigName].sigSize, msg.sig[sigName].endByte);
+        printf("ccc %x %s, %s,  %s    sigSize:%d, endByte:%d\n", msg.id, msg.sig[sigName].curValue.c_str(), msg.sig[sigName].curValue.c_str(), msg.sig[sigName].sigSize, msg.sig[sigName].endByte);
         calcValue(msg);
 //        for(uint8_t i : msg.data){
 //            printf("%x  ", i);

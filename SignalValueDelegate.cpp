@@ -110,7 +110,7 @@ void SignalValueDelegate::setEditorData(QWidget *editor,
 
     if(sigValue.empty()) { return;}
 
-    if(!Utils::isNum(sigValue)){
+    if(!Utils::isNum(sigValue) && (sigValue.find(":")!=string::npos)){
         vector<string> values = Utils::split(sigValue, ":");
         if(values.size()==2){
             sigValue =  values[1];
@@ -118,7 +118,7 @@ void SignalValueDelegate::setEditorData(QWidget *editor,
             if(!Utils::isNum(sigValue)){
                 sigValue = "";
             }
-        } else {
+        } else if(!(sigValue.find(",")!=string::npos)){
             sigValue = "";
         }
     }
